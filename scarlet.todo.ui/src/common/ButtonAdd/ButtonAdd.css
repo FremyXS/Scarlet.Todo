@@ -1,0 +1,25 @@
+.button-add{
+    display: inline-block;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+}
+
+.button-add:hover{
+    cursor: pointer;
+}
+
+
+.button-add__item{
+    background-color: inherit;
+    outline: none;
+    border: none;
+    padding: 0;
+    font-size: 17px;
+    color: #a7a7a7;
+}
+
+
+.button-add__plus{
+    margin-right: 5px;
+}

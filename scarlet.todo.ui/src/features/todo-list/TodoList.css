@@ -1,0 +1,7 @@
+.todo-list{
+    padding: 0 10px;
+}
+
+.todo-list > div:nth-last-child(n+2){
+    margin-bottom: 10px;
+}
