@@ -5,4 +5,5 @@ export class UpdateNoteDto extends PartialType(CreateNoteDto) {
   description: string;
   date: string;
   collectionNotesId: number;
+  isCompleted: boolean;
 }

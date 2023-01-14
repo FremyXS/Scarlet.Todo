@@ -40,6 +40,11 @@ export class TodoController {
     return this.todoService.updateNote(+id, updateTodoDto);
   }
 
+  @Patch('notes/complete/:id')
+  completeNote(@Param('id') id: string) {
+    return this.todoService.completeNote(+id);
+  }
+
   @Delete('notes/:id')
   removeNote(@Param('id') id: string) {
     return this.todoService.removeNote(+id);

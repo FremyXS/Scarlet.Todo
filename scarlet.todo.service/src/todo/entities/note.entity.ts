@@ -10,6 +10,9 @@ export class Note {
   @ApiProperty({ description: 'Note Date', nullable: false })
   date: string;
 
+  @ApiProperty({ description: 'Completed Note', nullable: false })
+  isCompleted: boolean;
+
   @ApiProperty({ description: 'Collection Id', nullable: false })
   collectionNotesId: number;
 }

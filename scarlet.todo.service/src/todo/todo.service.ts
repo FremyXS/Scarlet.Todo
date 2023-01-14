@@ -17,6 +17,7 @@ export class TodoService {
     this.notes.push({
       ...createNoteDto,
       id: ID,
+      isCompleted: false,
     });
 
     return ID;
@@ -40,6 +41,19 @@ export class TodoService {
       this.notes[this.notes.indexOf(oldNote)] = {
         ...updateNoteDto,
         id: id,
+      };
+    }
+
+    return id;
+  }
+
+  completeNote(id: number) {
+    const oldNote = this.notes.find((note) => note.id === id);
+
+    if (oldNote) {
+      this.notes[this.notes.indexOf(oldNote)] = {
+        ...oldNote,
+        isCompleted: !oldNote.isCompleted,
       };
     }
 
