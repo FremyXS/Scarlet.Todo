@@ -1,5 +1,5 @@
 import React from "react";
-import { NoteType } from "../types";
+import { NoteType } from "../../types";
 
 import './TodoNote.css';
 

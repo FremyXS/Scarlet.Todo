@@ -1,0 +1,24 @@
+.component-input__label{
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.component-input__item{
+    height: 50px;
+}
+
+.component-input__item > input{
+    outline: none;
+    border: 1px solid black;
+    border-radius: 20px;
+    padding: 0 15px;
+
+    width: 100%;
+    height: 100%;
+
+    font-size: 20px;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
