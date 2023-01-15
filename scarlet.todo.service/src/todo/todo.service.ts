@@ -5,75 +5,72 @@ import { UpdateCollectionNotesDto } from './dto/update-collection-notes.dto';
 import { CreateCollectionNotesDto } from './dto/create-collection-notes.dto';
 import { CollectionNotes } from './entities/collection-notes.entity';
 import { Note } from './entities/note.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TodoService {
-  private readonly collections: CollectionNotes[] = [];
-  private readonly notes: Note[] = [];
+  constructor(
+    @InjectRepository(Note)
+    private notesRepository: Repository<Note>,
+    @InjectRepository(CollectionNotes)
+    private collectionNotesRepository: Repository<CollectionNotes>,
+  ) {}
 
-  createNote(createNoteDto: CreateNoteDto) {
-    const ID = this.notes.length + 1;
+  async createNote(createNoteDto: CreateNoteDto) {
+    const data = await this.findOneCollection(createNoteDto.collectionNotesId);
 
-    this.notes.push({
-      ...createNoteDto,
-      id: ID,
+    return this.notesRepository.create({
+      description: createNoteDto.description,
+      date: createNoteDto.date,
       isCompleted: false,
+      collectionNotes: data!,
     });
-
-    return ID;
   }
 
-  createCollection(createCollectionNotesDto: CreateCollectionNotesDto) {
-    const ID = this.collections.length + 1;
-
-    this.collections.push({
-      ...createCollectionNotesDto,
-      id: ID,
+  async createCollection(createCollectionNotesDto: CreateCollectionNotesDto) {
+    return this.collectionNotesRepository.create({
+      title: createCollectionNotesDto.title,
     });
-
-    return ID;
   }
 
-  updateNote(id: number, updateNoteDto: UpdateNoteDto) {
-    const oldNote = this.notes.find((note) => note.id === id);
-
-    if (oldNote) {
-      this.notes[this.notes.indexOf(oldNote)] = {
-        ...updateNoteDto,
+  async updateNote(id: number, updateNoteDto: UpdateNoteDto) {
+    this.notesRepository.update(
+      {
         id: id,
-      };
-    }
-
-    return id;
+      },
+      {
+        date: updateNoteDto.date,
+        description: updateNoteDto.description,
+      },
+    );
   }
 
-  completeNote(id: number) {
-    const oldNote = this.notes.find((note) => note.id === id);
-
-    if (oldNote) {
-      this.notes[this.notes.indexOf(oldNote)] = {
-        ...oldNote,
-        isCompleted: !oldNote.isCompleted,
-      };
-    }
-
-    return id;
+  async completeNote(id: number) {
+    this.notesRepository.update(
+      {
+        id: id,
+      },
+      {
+        isCompleted: ((await this.findOneNote(id))?.isCompleted as boolean)
+          ? false
+          : true,
+      },
+    );
   }
 
-  updateCollection(
+  async updateCollection(
     id: number,
     updateCollectionNotesDto: UpdateCollectionNotesDto,
   ) {
-    const oldNote = this.collections.find((note) => note.id === id);
-
-    if (oldNote) {
-      this.collections[this.collections.indexOf(oldNote)] = {
-        ...updateCollectionNotesDto,
+    this.collectionNotesRepository.update(
+      {
         id: id,
-      };
-    }
-
-    return id;
+      },
+      {
+        title: updateCollectionNotesDto.title,
+      },
+    );
   }
 
   removeNote(id: number) {
@@ -84,15 +81,19 @@ export class TodoService {
     return `This action removes a #${id} todo`;
   }
 
-  findAllNotes() {
-    return this.notes;
+  async findAllNotes() {
+    return this.notesRepository.find();
   }
 
-  findAllCollections() {
-    return this.collections;
+  async findAllCollections() {
+    return this.collectionNotesRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} todo`;
+  async findOneCollection(id: number) {
+    return await this.collectionNotesRepository.findOneBy({ id: id });
+  }
+
+  async findOneNote(id: number) {
+    return await this.notesRepository.findOneBy({ id: id });
   }
 }

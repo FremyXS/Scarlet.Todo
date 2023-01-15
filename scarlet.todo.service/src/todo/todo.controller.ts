@@ -57,6 +57,7 @@ export class TodoController {
 
   @Post('collections')
   createCollections(@Body() createTodoDto: CreateCollectionNotesDto) {
+    console.log(createTodoDto);
     return this.todoService.createCollection(createTodoDto);
   }
 
