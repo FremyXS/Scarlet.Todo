@@ -7,6 +7,7 @@ import { CollectionNotes } from './entities/collection-notes.entity';
 import { Note } from './entities/note.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { NoteDto } from './dto/note.dto';
 
 @Injectable()
 export class TodoService {
@@ -20,7 +21,7 @@ export class TodoService {
   async createNote(createNoteDto: CreateNoteDto) {
     const data = await this.findOneCollection(createNoteDto.collectionNotesId);
 
-    return this.notesRepository.create({
+    return await this.notesRepository.save({
       description: createNoteDto.description,
       date: createNoteDto.date,
       isCompleted: false,
@@ -29,7 +30,7 @@ export class TodoService {
   }
 
   async createCollection(createCollectionNotesDto: CreateCollectionNotesDto) {
-    return this.collectionNotesRepository.create({
+    return await this.collectionNotesRepository.save({
       title: createCollectionNotesDto.title,
     });
   }
@@ -47,14 +48,13 @@ export class TodoService {
   }
 
   async completeNote(id: number) {
-    this.notesRepository.update(
+    console.log(await this.findOneNote(id));
+    await this.notesRepository.update(
       {
         id: id,
       },
       {
-        isCompleted: ((await this.findOneNote(id))?.isCompleted as boolean)
-          ? false
-          : true,
+        isCompleted: !((await this.findOneNote(id))?.isCompleted as boolean),
       },
     );
   }
@@ -63,7 +63,7 @@ export class TodoService {
     id: number,
     updateCollectionNotesDto: UpdateCollectionNotesDto,
   ) {
-    this.collectionNotesRepository.update(
+    await this.collectionNotesRepository.update(
       {
         id: id,
       },
@@ -82,11 +82,19 @@ export class TodoService {
   }
 
   async findAllNotes() {
-    return this.notesRepository.find();
+    const notes: NoteDto[] = [];
+    const notesData = await this.notesRepository
+      .createQueryBuilder('note')
+      .leftJoinAndSelect('note.collectionNotes', 'collection_notes')
+      .getMany();
+    notesData.map((el) => {
+      notes.push({ ...el, collectionNotesId: el.collectionNotes.id });
+    });
+    return notes;
   }
 
   async findAllCollections() {
-    return this.collectionNotesRepository.find();
+    return await this.collectionNotesRepository.find();
   }
 
   async findOneCollection(id: number) {
@@ -94,6 +102,17 @@ export class TodoService {
   }
 
   async findOneNote(id: number) {
-    return await this.notesRepository.findOneBy({ id: id });
+    const note = await this.notesRepository
+      .createQueryBuilder('note')
+      .leftJoinAndSelect('note.collectionNotes', 'collection_notes')
+      .where('note.id = :id', { id: id })
+      .getOne();
+
+    const noteDto: NoteDto = {
+      ...note!,
+      collectionNotesId: note?.collectionNotes.id as number,
+    };
+
+    return await noteDto;
   }
 }
